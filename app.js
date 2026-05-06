@@ -1,12 +1,29 @@
 const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
+const cheerio = require("cheerio");
 
 const app = express();
 
-app.use(express.static("public"));
+app.use(cors());
+app.use(express.json());
 
 /*
-  ROOT
+====================================
+CONFIG OKECONNECT
+====================================
 */
+
+const MEMBER_ID = "OK1526139";
+const PIN = "0509";
+const PASSWORD = "Rizkysaja123";
+
+/*
+====================================
+ROOT
+====================================
+*/
+
 app.get("/", (req, res) => {
 
   res.send("TOPUP ML SERVER ACTIVE");
@@ -14,19 +31,58 @@ app.get("/", (req, res) => {
 });
 
 /*
-  GET PRODUCTS
+====================================
+GET LIST PRODUK
+====================================
 */
+
 app.get("/products", async (req, res) => {
 
   try {
 
-    const response =
-      await fetch("https://okeconnect.com/harga");
+    const response = await axios.get(
+      "https://okeconnect.com/harga"
+    );
 
-    const html =
-      await response.text();
+    const html = response.data;
 
-    res.send(html);
+    const $ = cheerio.load(html);
+
+    let products = [];
+
+    $("table tbody tr").each((i, el) => {
+
+      const cols = $(el).find("td");
+
+      const kategori =
+        $(cols[0]).text().trim();
+
+      const kode =
+        $(cols[1]).text().trim();
+
+      const nama =
+        $(cols[2]).text().trim();
+
+      if (
+        kode &&
+        nama
+      ) {
+
+        products.push({
+          kategori,
+          kode,
+          nama
+        });
+
+      }
+
+    });
+
+    res.json({
+      success: true,
+      total: products.length,
+      products
+    });
 
   } catch (err) {
 
@@ -40,32 +96,39 @@ app.get("/products", async (req, res) => {
 });
 
 /*
-  TEST ORDER
+====================================
+TRANSAKSI
+====================================
 */
-app.get("/test", async (req, res) => {
+
+app.post("/order", async (req, res) => {
 
   try {
 
-    const memberID = "OK1526139";
-    const pin = "0509";
-    const password = "Rizkysaja123";
+    const {
+      product,
+      dest
+    } = req.body;
 
-    const product = "DML86";
-    const dest = "123456781234";
+    if (!product || !dest) {
+
+      return res.json({
+        success: false,
+        message: "product & dest wajib"
+      });
+
+    }
 
     const refID =
       Date.now();
 
     const url =
-      `https://h2h.okeconnect.com/trx?product=${product}&dest=${dest}&refID=${refID}&memberID=${memberID}&pin=${pin}&password=${password}`;
+      `https://h2h.okeconnect.com/trx?product=${product}&dest=${dest}&refID=${refID}&memberID=${MEMBER_ID}&pin=${PIN}&password=${PASSWORD}`;
 
     const response =
-      await fetch(url);
+      await axios.get(url);
 
-    const text =
-      await response.text();
-
-    res.send(text);
+    res.send(response.data);
 
   } catch (err) {
 
@@ -78,8 +141,50 @@ app.get("/test", async (req, res) => {
 
 });
 
-app.listen(process.env.PORT || 3000, () => {
+/*
+====================================
+CEK STATUS TRANSAKSI
+====================================
+*/
 
-  console.log("SERVER RUNNING");
+app.get("/status/:id", async (req, res) => {
+
+  try {
+
+    const id = req.params.id;
+
+    const url =
+      `https://h2h.okeconnect.com/status?memberID=${MEMBER_ID}&password=${PASSWORD}&id=${id}`;
+
+    const response =
+      await axios.get(url);
+
+    res.send(response.data);
+
+  } catch (err) {
+
+    res.json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+
+/*
+====================================
+START SERVER
+====================================
+*/
+
+const PORT =
+  process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+
+  console.log(
+    "SERVER RUNNING ON PORT " + PORT
+  );
 
 });
