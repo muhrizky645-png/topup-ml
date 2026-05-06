@@ -1,26 +1,38 @@
-const express = require("express");
-const path = require("path");
+app.post("/order", async (req, res) => {
 
-const app = express();
+  const axios = require("axios");
 
-app.use(express.json());
+  const {
+    product,
+    userid,
+    zone
+  } = req.body;
 
-app.use(express.static(__dirname));
+  try {
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
+    const tujuan = userid + zone;
 
-app.post("/order", (req, res) => {
+    const response = await axios.post(
+      "https://h2h.okeconnect.com/trx",
+      {
+        userid: "OK1526139",
+        password: "Rizkysaja123",
+        product: product,
+        tujuan: tujuan
+      }
+    );
 
-  res.json({
-    success: true
-  });
+    res.json(response.data);
 
-});
+  } catch (err) {
 
-const PORT = process.env.PORT || 3000;
+    console.log(err);
 
-app.listen(PORT, () => {
-  console.log("Server running");
+    res.json({
+      success: false,
+      message: "Gagal order"
+    });
+
+  }
+
 });
