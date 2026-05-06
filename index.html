@@ -7,97 +7,31 @@
 
 <h1>TOPUP ML</h1>
 
-<div id="products"></div>
+<pre id="result"></pre>
 
 <script>
 
 async function loadProducts() {
 
-  const response = await fetch("/products");
+  try {
 
-  const data = await response.json();
+    const response =
+      await fetch("/products");
 
-  console.log(data);
+    const text =
+      await response.text();
 
-  const productsDiv =
-    document.getElementById("products");
+    document.getElementById("result")
+      .innerText = text;
 
-  productsDiv.innerHTML = "";
+  } catch (err) {
 
-  // sesuaikan struktur API
-  const list = data.data || [];
+    document.getElementById("result")
+      .innerText = err.message;
 
-  list.forEach(product => {
-
-    // filter mobile legends saja
-    if (
-      product.kategori &&
-      product.kategori.includes("TPG Diamond Mobile Legends")
-    ) {
-
-      productsDiv.innerHTML += `
-        <div style="
-          border:1px solid #ccc;
-          padding:10px;
-          margin:10px;
-        ">
-
-          <h3>${product.nama}</h3>
-
-          <p>
-            Harga:
-            Rp ${product.harga}
-          </p>
-
-          <button onclick="
-            orderProduct('${product.kode}')
-          ">
-            Beli
-          </button>
-
-        </div>
-      `;
-    }
-
-  });
+  }
 
 }
-
-
-async function orderProduct(code) {
-
-  const userid =
-    prompt("Masukkan User ID");
-
-  const zone =
-    prompt("Masukkan Zone ID");
-
-  const dest =
-    userid + zone;
-
-  const response =
-    await fetch("/order", {
-
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
-        product: code,
-        dest
-      })
-
-    });
-
-  const result =
-    await response.json();
-
-  alert(result.result);
-
-}
-
 
 loadProducts();
 
