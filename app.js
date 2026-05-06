@@ -1,37 +1,36 @@
-const express = require("express");
-const path = require("path");
+async function buyNow(){
 
-const app = express();
+    const userid = document.getElementById("userid").value;
+    const zone = document.getElementById("zone").value;
 
-app.use(express.json());
+    alert("Mengirim order...");
 
-app.use(express.static(__dirname));
+    fetch("/order", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            product: selectedProduct,
+            userid: userid,
+            zone: zone
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
 
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
-});
+        alert(
+            "Order Berhasil\n\n" +
+            "Produk: " + data.product
+        );
 
-app.post("/order", (req, res) => {
+    })
+    .catch(err => {
 
-    const {
-        product,
-        userid,
-        zone
-    } = req.body;
+        alert("Error Server");
 
-    console.log(product);
+        console.log(err);
 
-    res.json({
-        success: true,
-        product,
-        userid,
-        zone
     });
 
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log("Server running");
-});
+}
