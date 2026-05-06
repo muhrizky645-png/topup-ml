@@ -1,84 +1,27 @@
 const express = require("express");
-const path = require("path");
+const fetch = require("node-fetch");
 
 const app = express();
 
-app.use(express.json());
-app.use(express.static(__dirname));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-
-// ============================
-// AMBIL PRODUK
-// ============================
+app.use(express.static("public"));
 
 app.get("/products", async (req, res) => {
 
   try {
 
     const memberID = "OK1526139";
-    const password = "PASSWORD_KAMU";
-
-    const url =
-      `https://h2h.okeconnect.com/trx/allprice/JSON?id=${memberID}&key=${password}`;
-
-    const response = await fetch(url);
-
-    const result = await response.json();
-
-    res.json(result);
-
-  } catch (err) {
-
-    res.json({
-      success: false,
-      error: err.message
-    });
-
-  }
-
-});
-
-
-// ============================
-// ORDER
-// ============================
-
-app.post("/order", async (req, res) => {
-
-  try {
-
-    const {
-      product,
-      dest
-    } = req.body;
-
-    const memberID = "OK1526139";
     const pin = "0509";
-    const password = "Rizkysaja123";
-
-    const refID = Date.now();
 
     const url =
-      `https://h2h.okeconnect.com/trx` +
-      `?product=${product}` +
-      `&dest=${dest}` +
-      `&refID=${refID}` +
-      `&memberID=${memberID}` +
-      `&pin=${pin}` +
-      `&password=${password}`;
+      `https://h2h.okeconnect.com/harga?id=${memberID}&pin=${pin}`;
 
-    const response = await fetch(url);
+    const response =
+      await fetch(url);
 
-    const result = await response.text();
+    const text =
+      await response.text();
 
-    res.json({
-      success: true,
-      result
-    });
+    res.send(text);
 
   } catch (err) {
 
@@ -91,11 +34,4 @@ app.post("/order", async (req, res) => {
 
 });
 
-
-// ============================
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("SERVER RUNNING");
-});
+app.listen(process.env.PORT || 3000);
