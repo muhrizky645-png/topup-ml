@@ -1,7 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>TOPUP ML</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TOPUP ML</title>
+
+<style>
+
+body{
+    font-family: Arial;
+    padding:20px;
+}
+
+button{
+    padding:10px 20px;
+    cursor:pointer;
+}
+
+</style>
+
 </head>
 <body>
 
@@ -10,33 +28,35 @@
 <button onclick="testOrder()">TEST ORDER</button>
 
 <script>
-async function testOrder() {
 
-  try {
+async function testOrder(){
 
-    const response = await fetch("/order", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        product: "ML86",
-        userid: "12345678",
-        zone: "1234"
-      })
-    });
+    try{
 
-    const data = await response.json();
+        const response = await fetch("/order",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                product:"ML86",
+                userid:"12345678",
+                zone:"1234"
+            })
+        });
 
-    alert(JSON.stringify(data));
+        const data = await response.text();
 
-  } catch (err) {
+        alert(data);
 
-    alert(err.message);
+    }catch(err){
 
-  }
+        alert(err.message);
+
+    }
 
 }
+
 </script>
 
 </body>
