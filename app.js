@@ -8,16 +8,18 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.post("/order", async (req, res) => {
+app.post("/order", (req, res) => {
 
     const {
         product,
         userid,
         zone
     } = req.body;
+
+    console.log(product);
 
     res.json({
         success: true,
@@ -31,5 +33,5 @@ app.post("/order", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server running");
+    console.log("Server running");
 });
