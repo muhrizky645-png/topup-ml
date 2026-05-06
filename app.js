@@ -14,25 +14,33 @@ app.post("/order", async (req, res) => {
 
   try {
 
-    const body = {
-      memberID: "OK1526139",
-      password: "Rizkysaja123",
-      pin: "0509",
-      product: "DML86",
-      dest: "123456789",
-      refID: "INV" + Date.now()
-    };
+    const {
+      product,
+      userid,
+      zone
+    } = req.body;
 
-    const response = await fetch(
-      "https://h2h.okeconnect.com/trx",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      }
-    );
+    // DATA OKECONNECT
+    const memberID = "OK1526139";
+    const password = "Rizkysaja123";
+    const pin = "0509";
+
+    // PRODUK
+    const kodeProduk = "DML86";
+
+    // TUJUAN
+    const dest = userid + zone;
+
+    // REF ID
+    const refID = Date.now();
+
+    // URL FIX
+    const url =
+      `https://h2h.okeconnect.com/trx?product=${kodeProduk}&dest=${dest}&refID=${refID}&memberID=${memberID}&pin=${pin}&password=${password}`;
+
+    console.log(url);
+
+    const response = await fetch(url);
 
     const text = await response.text();
 
@@ -51,5 +59,5 @@ app.post("/order", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("RUNNING");
+  console.log("SERVER RUNNING");
 });
