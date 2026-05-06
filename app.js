@@ -1,5 +1,4 @@
 const express = require("express");
-const fetch = require("node-fetch");
 
 const app = express();
 
@@ -13,13 +12,11 @@ app.get("/products", async (req, res) => {
     const pin = "0509";
 
     const url =
-      `https://h2h.okeconnect.com/harga?id=${memberID}&pin=${pin}`;
+      `https://h2h.okeconnect.com/trx?product=${memberID}&pin=${pin}`;
 
-    const response =
-      await fetch(url);
+    const response = await fetch(url);
 
-    const text =
-      await response.text();
+    const text = await response.text();
 
     res.send(text);
 
