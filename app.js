@@ -32,7 +32,7 @@ app.post("/order", async (req, res) => {
 
     // URL API
     const url =
-      `https://h2h.okeconnect.com/trx/trx?memberID=${memberID}&password=${password}&pin=${pin}&product=${kodeProduk}&dest=${tujuan}`;
+      `https://h2h.okeconnect.com/trx/api?memberID=${memberID}&password=${password}&pin=${pin}&product=${kodeProduk}&dest=${tujuan}`;
 
     console.log(url);
 
