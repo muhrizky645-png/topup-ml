@@ -1,43 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>TEST</title>
+  <title>TOPUP ML</title>
 </head>
 <body>
 
 <h1>TOPUP ML</h1>
 
-<button onclick="test()">
-TEST ORDER
-</button>
+<button onclick="testOrder()">TEST ORDER</button>
 
 <script>
+async function testOrder() {
 
-function test(){
+  try {
 
-    fetch("/order",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            product:"86 Diamond"
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        alert("BERHASIL");
-
-    })
-    .catch(err => {
-
-        alert(JSON.stringify(data));
-
+    const response = await fetch("/order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        product: "ML86",
+        userid: "12345678",
+        zone: "1234"
+      })
     });
 
-}
+    const data = await response.json();
 
+    alert(JSON.stringify(data));
+
+  } catch (err) {
+
+    alert(err.message);
+
+  }
+
+}
 </script>
 
 </body>
