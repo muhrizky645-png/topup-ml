@@ -26,7 +26,7 @@ app.post("/order", async (req, res) => {
     const pin = "0509";
 
     // PRODUK
-    const kodeProduk = "ML86";
+    const kodeProduk = "DML86";
 
     // TUJUAN
     const dest = userid + zone;
