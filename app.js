@@ -28,7 +28,7 @@ app.post("/order", async (req, res) => {
     const tujuan = `${userid}${zone}`;
 
     // KODE PRODUK
-    const kodeProduk = "ML86";
+    const kodeProduk = "DML86";
 
     // URL API
     const url =
