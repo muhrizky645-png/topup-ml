@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const cheerio = require("cheerio");
 
 const app = express();
 
@@ -41,47 +40,13 @@ app.get("/products", async (req, res) => {
   try {
 
     const response = await axios.get(
-      "https://okeconnect.com/harga"
+      "https://okeconnect.com/harga/json?id=905ccd028329b0a"
     );
-
-    const html = response.data;
-
-    const $ = cheerio.load(html);
-
-    let products = [];
-
-    $("table tbody tr").each((i, el) => {
-
-      const cols = $(el).find("td");
-
-      const kategori =
-        $(cols[0]).text().trim();
-
-      const kode =
-        $(cols[1]).text().trim();
-
-      const nama =
-        $(cols[2]).text().trim();
-
-      if (
-        kode &&
-        nama
-      ) {
-
-        products.push({
-          kategori,
-          kode,
-          nama
-        });
-
-      }
-
-    });
 
     res.json({
       success: true,
-      total: products.length,
-      products
+      total: response.data.length,
+      products: response.data
     });
 
   } catch (err) {
@@ -119,8 +84,7 @@ app.post("/order", async (req, res) => {
 
     }
 
-    const refID =
-      Date.now();
+    const refID = Date.now();
 
     const url =
       `https://h2h.okeconnect.com/trx?product=${product}&dest=${dest}&refID=${refID}&memberID=${MEMBER_ID}&pin=${PIN}&password=${PASSWORD}`;
