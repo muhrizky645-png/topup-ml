@@ -6,12 +6,12 @@
 
 <title>Topup Mobile Legends</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 
 body{
-    background:#f4f4f4;
+    background:#f5f5f5;
     font-family:sans-serif;
 }
 
@@ -50,8 +50,9 @@ body{
     font-weight:bold;
 }
 
-.btn-tab{
-    width:48%;
+.modal-header{
+    background:#2196F3;
+    color:white;
 }
 
 </style>
@@ -67,7 +68,7 @@ body{
 
         <div class="row">
             <div class="col-8">
-                <input type="text" id="id" class="form-control" placeholder="ID Player">
+                <input type="text" id="userid" class="form-control" placeholder="ID Player">
             </div>
 
             <div class="col-4">
@@ -79,63 +80,125 @@ body{
             <input type="text" class="form-control" placeholder="Nama Player" disabled>
         </div>
 
-        <div class="d-flex justify-content-between mt-4">
-            <button class="btn btn-primary btn-tab">
-                Diamond
-            </button>
+        <div class="row mt-4">
+            <div class="col-6">
+                <button class="btn btn-primary w-100">
+                    Diamond
+                </button>
+            </div>
 
-            <button class="btn btn-light btn-tab">
-                Membership
-            </button>
+            <div class="col-6">
+                <button class="btn btn-light w-100">
+                    Membership
+                </button>
+            </div>
         </div>
 
     </div>
 
-    <!-- PRODUCT -->
+    <!-- PRODUK -->
 
-    <div class="product" onclick="order('86 Diamond')">
-        <div>
-            86 Diamond
-        </div>
-
-        <div class="price">
-            Rp20.000
-        </div>
+    <div class="product" onclick="openModal('86 Diamond','Rp20.000')">
+        <div>86 Diamond</div>
+        <div class="price">Rp20.000</div>
     </div>
 
-    <div class="product" onclick="order('172 Diamond')">
-        <div>
-            172 Diamond
-        </div>
-
-        <div class="price">
-            Rp40.000
-        </div>
+    <div class="product" onclick="openModal('172 Diamond','Rp40.000')">
+        <div>172 Diamond</div>
+        <div class="price">Rp40.000</div>
     </div>
 
-    <div class="product" onclick="order('Weekly Diamond Pass')">
-        <div>
-            Weekly Diamond Pass
-        </div>
-
-        <div class="price">
-            Rp28.000
-        </div>
+    <div class="product" onclick="openModal('Weekly Diamond Pass','Rp28.000')">
+        <div>Weekly Diamond Pass</div>
+        <div class="price">Rp28.000</div>
     </div>
 
 </div>
 
+<!-- MODAL -->
+
+<div class="modal fade" id="buyModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+            Lanjutkan Pembayaran
+        </h5>
+      </div>
+
+      <div class="modal-body">
+
+        <table class="table">
+
+            <tr>
+                <td>Produk</td>
+                <td id="modalProduk"></td>
+            </tr>
+
+            <tr>
+                <td>No Tujuan</td>
+                <td id="modalUserid"></td>
+            </tr>
+
+            <tr>
+                <td>Harga</td>
+                <td id="modalHarga"></td>
+            </tr>
+
+        </table>
+
+      </div>
+
+      <div class="modal-footer">
+
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+            Batal
+        </button>
+
+        <button class="btn btn-primary" onclick="buyNow()">
+            Beli
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
 
-async function order(product){
+let selectedProduct = "";
+let selectedPrice = "";
 
-    const userid = document.getElementById("id").value;
+function openModal(product, price){
+
+    const userid = document.getElementById("userid").value;
     const zone = document.getElementById("zone").value;
 
     if(!userid || !zone){
-        alert("Masukkan ID dan Zone ID");
+        alert("Masukkan ID dan Zone");
         return;
     }
+
+    selectedProduct = product;
+    selectedPrice = price;
+
+    document.getElementById("modalProduk").innerText = product;
+    document.getElementById("modalUserid").innerText = userid + " (" + zone + ")";
+    document.getElementById("modalHarga").innerText = price;
+
+    const modal = new bootstrap.Modal(document.getElementById('buyModal'));
+    modal.show();
+
+}
+
+async function buyNow(){
+
+    const userid = document.getElementById("userid").value;
+    const zone = document.getElementById("zone").value;
 
     try{
 
@@ -145,7 +208,7 @@ async function order(product){
                 "Content-Type":"application/json"
             },
             body:JSON.stringify({
-                product:product,
+                product:selectedProduct,
                 userid:userid,
                 zone:zone
             })
@@ -159,6 +222,8 @@ async function order(product){
             "ID : " + data.userid + "\n" +
             "Zone : " + data.zone
         );
+
+        location.reload();
 
     }catch(err){
 
