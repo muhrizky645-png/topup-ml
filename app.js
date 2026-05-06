@@ -11,52 +11,45 @@ app.get("/", (req, res) => {
 });
 
 app.post("/order", async (req, res) => {
+
   try {
 
-    const {
-      product,
-      userid,
-      zone
-    } = req.body;
+    const body = {
+      memberID: "OK1526139",
+      password: "Rizkysaja123",
+      pin: "0509",
+      product: "DML86",
+      dest: "123456789",
+      refID: "INV" + Date.now()
+    };
 
-    // DATA OKECONNECT
-    const memberID = "OK1526139";
-    const password = "Rizkysaja123";
-    const pin = "0509";
-
-    // FORMAT TUJUAN
-    const tujuan = `${userid}${zone}`;
-
-    // KODE PRODUK
-    const kodeProduk = "DML86";
-
-    // URL API
-    const url =
-      `https://h2h.okeconnect.com/trx/api?memberID=${memberID}&password=${password}&pin=${pin}&product=${kodeProduk}&dest=${tujuan}`;
-
-    console.log(url);
-
-    const response = await fetch(url);
+    const response = await fetch(
+      "https://h2h.okeconnect.com/trx",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      }
+    );
 
     const text = await response.text();
 
-    res.json({
-      success: true,
-      result: text
-    });
+    console.log(text);
+
+    res.send(text);
 
   } catch (err) {
 
-    res.json({
-      success: false,
-      error: err.message
-    });
+    res.send(err.message);
 
   }
+
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server running");
+  console.log("RUNNING");
 });
