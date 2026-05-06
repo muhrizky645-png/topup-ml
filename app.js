@@ -24,7 +24,7 @@ app.post("/order", async (req, res) => {
     const ref_id = "INV" + Date.now();
 
     const response = await axios.post(
-      "https://h2h.okecconnect.com/trx",
+      "https://h2h.okeconnect.com/trx",
       {
         username: "OK1526139",
         api_key: "Rizkysaja123",
