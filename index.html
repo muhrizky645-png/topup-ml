@@ -1,61 +1,105 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>TOPUP ML</title>
-
-<style>
-
-body{
-    font-family: Arial;
-    padding:20px;
-}
-
-button{
-    padding:10px 20px;
-    cursor:pointer;
-}
-
-</style>
-
+  <title>TOPUP ML</title>
 </head>
 <body>
 
 <h1>TOPUP ML</h1>
 
-<button onclick="testOrder()">TEST ORDER</button>
+<div id="products"></div>
 
 <script>
 
-async function testOrder(){
+async function loadProducts() {
 
-    try{
+  const response = await fetch("/products");
 
-        const response = await fetch("/order",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                product:"ML86",
-                userid:"12345678",
-                zone:"1234"
-            })
-        });
+  const data = await response.json();
 
-        const data = await response.text();
+  console.log(data);
 
-        alert(data);
+  const productsDiv =
+    document.getElementById("products");
 
-    }catch(err){
+  productsDiv.innerHTML = "";
 
-        alert(err.message);
+  // sesuaikan struktur API
+  const list = data.data || [];
 
+  list.forEach(product => {
+
+    // filter mobile legends saja
+    if (
+      product.kategori &&
+      product.kategori.includes("Mobile Legends")
+    ) {
+
+      productsDiv.innerHTML += `
+        <div style="
+          border:1px solid #ccc;
+          padding:10px;
+          margin:10px;
+        ">
+
+          <h3>${product.nama}</h3>
+
+          <p>
+            Harga:
+            Rp ${product.harga}
+          </p>
+
+          <button onclick="
+            orderProduct('${product.kode}')
+          ">
+            Beli
+          </button>
+
+        </div>
+      `;
     }
 
+  });
+
 }
+
+
+async function orderProduct(code) {
+
+  const userid =
+    prompt("Masukkan User ID");
+
+  const zone =
+    prompt("Masukkan Zone ID");
+
+  const dest =
+    userid + zone;
+
+  const response =
+    await fetch("/order", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        product: code,
+        dest
+      })
+
+    });
+
+  const result =
+    await response.json();
+
+  alert(result.result);
+
+}
+
+
+loadProducts();
 
 </script>
 
