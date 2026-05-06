@@ -1,7 +1,5 @@
 const express = require("express");
 const path = require("path");
-const axios = require("axios");
-const qs = require("qs");
 
 const app = express();
 
@@ -13,7 +11,6 @@ app.get("/", (req, res) => {
 });
 
 app.post("/order", async (req, res) => {
-
   try {
 
     const {
@@ -22,44 +19,44 @@ app.post("/order", async (req, res) => {
       zone
     } = req.body;
 
-    const ref_id = "INV" + Date.now();
+    // DATA OKECONNECT
+    const memberID = "OK1526139";
+    const password = "Rizkysaja123";
+    const pin = "0509";
 
-    const data = qs.stringify({
-      username: "OK1526139",
-      api_key: "Rizkysaja123",
-      code: product,
-      target: userid + zone,
-      ref_id: ref_id
-    });
+    // FORMAT TUJUAN
+    const tujuan = `${userid}${zone}`;
 
-    const response = await axios.post(
-      "https://h2h.okeconnect.com/trx",
-      data,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
-      }
-    );
+    // KODE PRODUK
+    const kodeProduk = "ML86";
+
+    // URL API
+    const url =
+      `https://h2h.okeconnect.com/trx/trx?memberID=${memberID}&password=${password}&pin=${pin}&product=${kodeProduk}&dest=${tujuan}`;
+
+    console.log(url);
+
+    const response = await fetch(url);
+
+    const text = await response.text();
 
     res.json({
       success: true,
-      result: response.data
+      result: text
     });
 
   } catch (err) {
 
     res.json({
       success: false,
-      error: err.response?.data || err.message
+      error: err.message
     });
 
   }
-
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server jalan");
+  console.log("Server running");
 });
