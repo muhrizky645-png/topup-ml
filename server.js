@@ -25,6 +25,31 @@ app.get("/", (req, res) => {
 
 
 // ======================================
+// CEK IP RAILWAY
+// ======================================
+
+app.get("/myip", async (req, res) => {
+
+    try {
+
+        const response = await axios.get(
+            "https://api.ipify.org?format=json"
+        );
+
+        res.json(response.data);
+
+    } catch (err) {
+
+        console.log(err.message);
+
+        res.send("Gagal cek IP");
+
+    }
+
+});
+
+
+// ======================================
 // PRODUCTS MOBILE LEGENDS
 // ======================================
 
@@ -49,7 +74,9 @@ app.get("/api/products", async (req, res) => {
 
             code: item.kode,
 
-            name: item.kode.replace("DML", "") + " Diamond Mobile Legends",
+            name:
+                item.kode.replace("DML", "") +
+                " Diamond Mobile Legends",
 
             price: item.harga,
 
@@ -59,8 +86,11 @@ app.get("/api/products", async (req, res) => {
 
         result.sort((a, b) => {
 
-            const aValue = parseInt(a.code.replace("DML", ""));
-            const bValue = parseInt(b.code.replace("DML", ""));
+            const aValue =
+                parseInt(a.code.replace("DML", ""));
+
+            const bValue =
+                parseInt(b.code.replace("DML", ""));
 
             return aValue - bValue;
 
@@ -73,8 +103,10 @@ app.get("/api/products", async (req, res) => {
         console.log(err.message);
 
         res.status(500).json({
+
             status: false,
             message: "Gagal mengambil produk"
+
         });
 
     }
@@ -153,7 +185,9 @@ app.get("/checkout", async (req, res) => {
 
                     <hr>
 
-                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                    <pre>
+${JSON.stringify(result, null, 2)}
+                    </pre>
 
                 </div>
 
