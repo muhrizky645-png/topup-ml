@@ -165,6 +165,7 @@ app.get("/api/cek-nickname", async (req, res) => {
 // ======================================
 
 app.get("/checkout", async (req, res) => {
+app.get("/checkout", async (req, res) => {
 
     try {
 
@@ -197,6 +198,34 @@ app.get("/checkout", async (req, res) => {
             }
 
         );
+
+        res.send(`
+
+            <h2>TRANSAKSI BERHASIL</h2>
+
+            <pre>
+${JSON.stringify(response.data, null, 2)}
+            </pre>
+
+        `);
+
+    } catch (err) {
+
+        console.log(err.response?.data || err.message);
+
+        res.send(`
+
+            <h2>CHECKOUT ERROR</h2>
+
+            <pre>
+${JSON.stringify(err.response?.data || err.message, null, 2)}
+            </pre>
+
+        `);
+
+    }
+
+}
 
         const result = response.data;
 
