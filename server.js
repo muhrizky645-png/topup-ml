@@ -370,27 +370,4 @@ app.listen(PORT, () => {
         "Server running on port " + PORT
     );
 
-});==
-// CALLBACK
-// ======================================
-
-app.get("/callback", async (req, res) => {
-
-    console.log(req.query);
-
-    res.send("Callback OK");
-
-});
-
-
-// ======================================
-// PORT
-// ======================================
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-
-    console.log("Server Running on Port " + PORT);
-
 });
