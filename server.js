@@ -161,10 +161,9 @@ app.get("/api/cek-nickname", async (req, res) => {
 
 
 // ======================================
-// CHECKOUT BUKAOLSHOP
+// CHECKOUT DEBUG
 // ======================================
 
-app.get("/checkout", async (req, res) => {
 app.get("/checkout", async (req, res) => {
 
     try {
@@ -201,11 +200,52 @@ app.get("/checkout", async (req, res) => {
 
         res.send(`
 
-            <h2>TRANSAKSI BERHASIL</h2>
+            <html>
 
-            <pre>
+            <head>
+
+                <title>Checkout</title>
+
+                <style>
+
+                    body{
+                        font-family: Arial;
+                        background:#f5f5f5;
+                        padding:20px;
+                    }
+
+                    .card{
+                        background:white;
+                        padding:20px;
+                        border-radius:10px;
+                    }
+
+                    pre{
+                        white-space:pre-wrap;
+                        word-wrap:break-word;
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                <div class="card">
+
+                    <h2>TRANSAKSI BERHASIL</h2>
+
+                    <hr>
+
+                    <pre>
 ${JSON.stringify(response.data, null, 2)}
-            </pre>
+                    </pre>
+
+                </div>
+
+            </body>
+
+            </html>
 
         `);
 
@@ -215,79 +255,55 @@ ${JSON.stringify(response.data, null, 2)}
 
         res.send(`
 
-            <h2>CHECKOUT ERROR</h2>
+            <html>
 
-            <pre>
+            <head>
+
+                <title>Checkout Error</title>
+
+                <style>
+
+                    body{
+                        font-family: Arial;
+                        background:#f5f5f5;
+                        padding:20px;
+                    }
+
+                    .card{
+                        background:white;
+                        padding:20px;
+                        border-radius:10px;
+                    }
+
+                    pre{
+                        white-space:pre-wrap;
+                        word-wrap:break-word;
+                        color:red;
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                <div class="card">
+
+                    <h2>CHECKOUT ERROR</h2>
+
+                    <hr>
+
+                    <pre>
 ${JSON.stringify(err.response?.data || err.message, null, 2)}
-            </pre>
+                    </pre>
+
+                </div>
+
+            </body>
+
+            </html>
 
         `);
-
-    }
-
-}
-
-        const result = response.data;
-
-        // =====================================
-        // TAMPILKAN HASIL
-        // =====================================
-
-        res.send(`
-
-        <html>
-
-        <head>
-
-            <title>Transaksi</title>
-
-            <style>
-
-                body{
-                    font-family: Arial;
-                    background:#f5f5f5;
-                    padding:20px;
-                }
-
-                .card{
-                    background:white;
-                    padding:20px;
-                    border-radius:10px;
-                }
-
-            </style>
-
-        </head>
-
-        <body>
-
-            <div class="card">
-
-                <h2>Transaksi Diproses</h2>
-
-                <p><b>Produk:</b> ${code}</p>
-
-                <p><b>Tujuan:</b> ${target}</p>
-
-                <hr>
-
-                <pre>
-${JSON.stringify(result, null, 2)}
-                </pre>
-
-            </div>
-
-        </body>
-
-        </html>
-
-        `);
-
-    } catch (err) {
-
-        console.log(err.response?.data || err.message);
-
-        res.send("Checkout Error");
 
     }
 
