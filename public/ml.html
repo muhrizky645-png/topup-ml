@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>TOPUP ML</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      font-family:Arial;
+      background:#f5f5f5;
+    }
+
+    .navbar{
+      background:#2196f3;
+      color:white;
+      padding:18px;
+      font-size:22px;
+      font-weight:bold;
+    }
+
+    .container{
+      padding:20px;
+    }
+
+    .search{
+      width:100%;
+      padding:14px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      margin-bottom:20px;
+      font-size:16px;
+      box-sizing:border-box;
+    }
+
+    .card{
+      background:white;
+      border-radius:15px;
+      padding:20px;
+      margin-bottom:20px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .title{
+      font-size:30px;
+      font-weight:bold;
+      margin-bottom:20px;
+    }
+
+    .produk{
+      font-size:20px;
+      font-weight:bold;
+      margin-bottom:15px;
+    }
+
+    .harga{
+      margin-top:10px;
+      font-size:18px;
+    }
+
+    button{
+      margin-top:20px;
+      padding:12px 20px;
+      border:none;
+      border-radius:10px;
+      background:#2196f3;
+      color:white;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#1976d2;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="navbar">
+    TOPUP ML
+  </div>
+
+  <div class="container">
+
+    <div class="title">
+      TOPUP ML
+    </div>
+
+    <input
+      type="text"
+      id="search"
+      class="search"
+      placeholder="Cari Produk"
+    >
+
+    <div id="products"></div>
+
+  </div>
+
+<script>
+
+const API =
+"https://topup-ml-production.up.railway.app";
+
+let allProducts = [];
+
+async function loadProducts(){
+
+  try{
+
+    const res =
+    await fetch(API + "/products");
+
+    const data =
+    await res.json();
+
+    allProducts = data.products.filter(item => {
+
+      return (
+        item.kode.toUpperCase().includes("DML")
+        ||
+        item.keterangan.toLowerCase().includes("mobile legend")
+      );
+
+    });
+
+    renderProducts(allProducts);
+
+  }catch(err){
+
+    alert("Gagal load produk");
+
+  }
+
+}
+
+function renderProducts(products){
+
+  const container =
+  document.getElementById("products");
+
+  container.innerHTML = "";
+
+  products.forEach(item=>{
+
+    if(item.status !== "1") return;
+
+    container.innerHTML += `
+
+      <div class="card">
+
+        <div class="produk">
+          ${item.keterangan}
+        </div>
+
+        <p>Kode : ${item.kode}</p>
+
+        <div class="harga">
+          Harga : Rp ${item.harga}
+        </div>
+
+        <button onclick="beli('${item.kode}')">
+          BELI
+        </button>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+async function beli(kode){
+
+  const tujuan =
+  prompt("Masukkan ID Mobile Legends");
+
+  if(!tujuan) return;
+
+  try{
+
+    const res =
+    await fetch(API + "/order",{
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        product:kode,
+        dest:tujuan
+      })
+
+    });
+
+    const result =
+    await res.text();
+
+    alert(result);
+
+  }catch(err){
+
+    alert("Transaksi gagal");
+
+  }
+
+}
+
+document
+.getElementById("search")
+.addEventListener("input", function(){
+
+  const keyword =
+  this.value.toLowerCase();
+
+  const filtered =
+  allProducts.filter(item =>
+
+    item.keterangan
+    .toLowerCase()
+    .includes(keyword)
+
+  );
+
+  renderProducts(filtered);
+
+});
+
+loadProducts();
+
+</script>
+
+</body>
+</html>
