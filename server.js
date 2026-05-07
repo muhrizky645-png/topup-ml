@@ -2,483 +2,348 @@ require("dotenv").config();
 
 const express = require("express");
 const axios = require("axios");
-const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static(path.join(__dirname, "public")));
 
 
-// ======================================
-// ROOT
-// ======================================
-
-app.get("/", (req, res) => {
-
-    res.json({
-        status: true,
-        message: "API TOPUP ML ACTIVE"
-    });
-
-});
 
 
-// ======================================
-// CEK IP RAILWAY
-// ======================================
 
-app.get("/myip", async (req, res) => {
+/*
+====================================================
+TEST MODE MEMBER BUKAOLSHOP
+====================================================
+ISI MANUAL UNTUK TESTING
+====================================================
+*/
 
-    try {
-
-        const response = await axios.get(
-            "https://api.ipify.org?format=json"
-        );
-
-        res.json(response.data);
-
-    } catch (err) {
-
-        res.send("Gagal cek IP");
-
-    }
-
-});
+const member_id = "ISI_ID_MEMBER_BUKAOLSHOP";
+const token_user = "ISI_TOKEN_USER_BUKAOLSHOP";
 
 
-// ======================================
-// AMBIL PRODUK OKECONNECT
-// ======================================
-
-let products = [];
-
-async function loadProducts() {
-
-    try {
-
-        const response = await axios.get(
-            "https://okeconnect.com/harga/json?id=905ccd028329b0a"
-        );
-
-        const data = response.data;
-
-        const filtered = data.filter(item =>
-
-            item.kode &&
-            item.kode.startsWith("DML")
-
-        );
-
-        products = filtered.map(item => ({
-
-            code: item.kode,
-
-            name:
-                item.kode.replace("DML", "") +
-                " Diamond Mobile Legends",
-
-            price: parseInt(item.harga),
-
-            category: "Mobile Legends"
-
-        }));
-
-        products.sort((a, b) => {
-
-            const aValue =
-                parseInt(a.code.replace("DML", ""));
-
-            const bValue =
-                parseInt(b.code.replace("DML", ""));
-
-            return aValue - bValue;
-
-        });
-
-        console.log("Produk berhasil dimuat");
-
-    } catch (err) {
-
-        console.log("Gagal load produk");
-
-    }
-
-}
-
-// LOAD PRODUK AWAL
-loadProducts();
 
 
-// ======================================
-// API PRODUCTS
-// ======================================
 
-app.get("/api/products", async (req, res) => {
+/*
+====================================================
+API TOKEN BUKAOLSHOP
+====================================================
+*/
 
-    res.json(products);
+const BUKAOLSHOP_TOKEN =
+process.env.BUKAOLSHOP_TOKEN;
 
-});
 
 
-// ======================================
-// CEK NICKNAME
-// ======================================
 
-app.get("/api/cek-nickname", async (req, res) => {
+
+/*
+====================================================
+OKE CONNECT
+====================================================
+*/
+
+const OKE_MEMBER_ID =
+process.env.OKE_MEMBER_ID;
+
+const OKE_PASSWORD =
+process.env.OKE_PASSWORD;
+
+const OKE_PIN =
+process.env.OKE_PIN;
+
+
+
+
+
+/*
+====================================================
+CHECKOUT
+====================================================
+*/
+
+app.post("/checkout", async (req, res) => {
 
     try {
 
-        const user_id = req.query.user_id;
-        const zone = req.query.zone;
-        const game = req.query.game;
-
-        const response = await axios.get(
-
-            `https://cekid.solusimedia.my.id/api/game/${game}/` +
-            `?id=${user_id}` +
-            `&server=${zone}` +
-            `&key=e5771acb669df2b`
-
-        );
-
-        const data = response.data;
-
-        if (data.error_msg) {
-
-            return res.json({
-                status: false,
-                message: data.error_msg
-            });
-
-        }
-
-        return res.json({
-            status: true,
-            nickname: data.nickname
-        });
-
-    } catch (err) {
-
-        return res.json({
-            status: false,
-            message: "Nickname tidak ditemukan"
-        });
-
-    }
-
-});
+        const {
+            userId,
+            serverId,
+            productCode,
+            productName,
+            price
+        } = req.body;
 
 
-// ======================================
-// CHECKOUT
-// ======================================
 
-app.get('/checkout', async (req, res) => {
 
-    try {
 
-        const code = req.query.code;
-        const user_id = req.query.user_id;
-        const zone = req.query.zone;
-
-        // MEMBER BUKAOLSHOP
-        const member_id = req.query.member_id;
-        const token_user = req.query.token_user;
-
-        // =========================
-        // VALIDASI LOGIN MEMBER
-        // =========================
-
-        if (!member_id || !token_user) {
-
-            return res.send(`
-
-                <html>
-
-                <body style="font-family:sans-serif;padding:20px;">
-
-                    <h1>LOGIN MEMBER DIPERLUKAN</h1>
-
-                    <p>
-                        Website harus dibuka dari aplikasi
-                        BukaOlshop
-                    </p>
-
-                </body>
-
-                </html>
-
-            `);
-
-        }
-
-        // =========================
-        // CARI PRODUK
-        // =========================
-
-        const product = products.find(p => p.code == code);
-
-        if (!product) {
-
-            return res.send(`
-
-                <html>
-
-                <body style="font-family:sans-serif;padding:20px;">
-
-                    <h1>PRODUK TIDAK DITEMUKAN</h1>
-
-                </body>
-
-                </html>
-
-            `);
-
-        }
-
-        // =========================
-        // HARGA
-        // =========================
-
-        const harga = parseInt(product.price);
-
-        // =========================
-        // CEK SALDO MEMBER
-        // =========================
+        /*
+        ============================================
+        CEK SALDO MEMBER BUKAOLSHOP
+        ============================================
+        */
 
         const saldoResponse = await axios.get(
 
-            `https://openapi.bukaolshop.net/v1/member/saldo` +
-
-            `?token=${process.env.BUKAOLSHOP_API_KEY}` +
-            `&token_user=${token_user}` +
-            `&id_user=${member_id}`
+            `https://openapi.bukaolshop.net/v1/member/saldo?token=${BUKAOLSHOP_TOKEN}&id_user=${member_id}&token_user=${token_user}`
 
         );
 
-        const saldoMember = parseInt(
-            saldoResponse.data.data.saldo
-        );
 
-        // =========================
-        // SALDO TIDAK CUKUP
-        // =========================
 
-        if (saldoMember < harga) {
+        const saldo =
+        saldoResponse.data.data.saldo || 0;
+
+
+
+
+
+        if (saldo < price) {
 
             return res.send(`
 
-                <html>
+            <html>
 
-                <body style="font-family:sans-serif;background:#f5f5f5;padding:20px;">
+            <body style="
+                font-family:sans-serif;
+                padding:20px;
+                background:#f2f2f2;
+            ">
 
-                    <div style="background:white;padding:20px;border-radius:10px;">
+                <div style="
+                    background:white;
+                    padding:20px;
+                    border-radius:10px;
+                ">
 
-                        <h1 style="color:red;">
-                            SALDO TIDAK CUKUP
-                        </h1>
+                    <h1>SALDO TIDAK CUKUP</h1>
 
-                        <hr>
+                    <hr>
 
-                        <p>
-                            Saldo :
-                            Rp ${saldoMember}
-                        </p>
+                    <p>
+                        Saldo member tidak mencukupi
+                    </p>
 
-                        <p>
-                            Harga :
-                            Rp ${harga}
-                        </p>
+                    <p>
+                        Saldo : Rp ${saldo}
+                    </p>
 
-                    </div>
+                    <p>
+                        Harga : Rp ${price}
+                    </p>
 
-                </body>
+                </div>
 
-                </html>
+            </body>
+
+            </html>
 
             `);
 
         }
 
-        // =========================
-        // POTONG SALDO MEMBER
-        // =========================
+
+
+
+
+        /*
+        ============================================
+        POTONG SALDO MEMBER
+        ============================================
+        */
 
         await axios.post(
 
-            `https://openapi.bukaolshop.net/v1/member/saldo` +
-            `?token=${process.env.BUKAOLSHOP_API_KEY}`,
+            "https://openapi.bukaolshop.net/v1/member/kurang_saldo",
 
             {
 
+                token: BUKAOLSHOP_TOKEN,
                 id_user: member_id,
                 token_user: token_user,
-                tipe: "kurang",
-                jumlah: harga,
-                catatan: `Pembelian ${product.name}`
+                nominal: price,
+                keterangan:
+                `Topup ${productName}`
 
             }
 
         );
 
-        // =========================
-        // REF ID
-        // =========================
 
-        const ref_id = "ML" + Date.now();
 
-        // =========================
-        // TRANSAKSI OKECONNECT
-        // =========================
 
-        const trx = await axios.get(
 
-            `https://h2h.okeconnect.com/trx` +
+        /*
+        ============================================
+        TRANSAKSI OKE CONNECT
+        ============================================
+        */
 
-            `?product=${code}` +
-            `&dest=${user_id}${zone}` +
-            `&refID=${ref_id}` +
-            `&memberID=${process.env.OKE_MEMBER_ID}` +
-            `&pin=${process.env.OKE_PIN}` +
-            `&password=${process.env.OKE_PASSWORD}`
+        const refId =
+        Date.now();
 
-        );
+        const tujuan =
+        serverId
+        ? `${userId}${serverId}`
+        : userId;
 
-        const hasil = trx.data;
 
-        // =========================
-        // JIKA GAGAL
-        // =========================
 
-        if (
-            hasil.includes("GAGAL") ||
-            hasil.includes("ERROR")
-        ) {
 
-            // KEMBALIKAN SALDO
 
-            await axios.post(
+        const okeUrl =
 
-                `https://openapi.bukaolshop.net/v1/member/saldo` +
-                `?token=${process.env.BUKAOLSHOP_API_KEY}`,
+        `https://h2h.okeconnect.com/trx?product=${productCode}&dest=${tujuan}&refID=${refId}&memberID=${OKE_MEMBER_ID}&pin=${OKE_PIN}&password=${OKE_PASSWORD}`;
 
-                {
 
-                    id_user: member_id,
-                    token_user: token_user,
-                    tipe: "tambah",
-                    jumlah: harga,
-                    catatan: `Refund ${product.name}`
 
-                }
 
-            );
 
-            return res.send(`
+        const trx = await axios.get(okeUrl);
 
-                <html>
 
-                <body style="font-family:sans-serif;background:#f5f5f5;padding:20px;">
 
-                    <div style="background:white;padding:20px;border-radius:10px;">
 
-                        <h1 style="color:red;">
-                            TRANSAKSI GAGAL
-                        </h1>
 
-                        <hr>
+        /*
+        ============================================
+        TAMPILAN BERHASIL
+        ============================================
+        */
 
-                        <pre>${hasil}</pre>
+        res.send(`
 
-                        <hr>
+        <html>
 
-                        <p>
-                            Saldo dikembalikan
-                        </p>
+        <head>
 
-                    </div>
+            <title>Transaksi</title>
 
-                </body>
+        </head>
 
-                </html>
+        <body style="
+            margin:0;
+            font-family:sans-serif;
+            background:#f2f2f2;
+        ">
 
-            `);
+            <div style="
+                background:#2196f3;
+                color:white;
+                padding:18px;
+                font-size:28px;
+                font-weight:bold;
+            ">
+                Transaksi
+            </div>
 
-        }
+            <div style="
+                padding:20px;
+            ">
 
-        // =========================
-        // SUKSES
-        // =========================
+                <div style="
+                    background:white;
+                    border-radius:12px;
+                    padding:20px;
+                ">
 
-        return res.send(`
-
-            <html>
-
-            <body style="font-family:sans-serif;background:#f5f5f5;padding:20px;">
-
-                <div style="background:white;padding:20px;border-radius:10px;">
-
-                    <h1 style="color:green;">
-                        TRANSAKSI BERHASIL
+                    <h1>
+                        Transaksi Diproses
                     </h1>
 
+                    <p>
+                        <b>Produk:</b>
+                        ${productName}
+                    </p>
+
+                    <p>
+                        <b>Tujuan:</b>
+                        ${tujuan}
+                    </p>
+
+                    <p>
+                        <b>Harga:</b>
+                        Rp ${price}
+                    </p>
+
                     <hr>
 
-                    <p>
-                        Produk :
-                        ${product.name}
-                    </p>
-
-                    <p>
-                        Tujuan :
-                        ${user_id} (${zone})
-                    </p>
-
-                    <p>
-                        Harga :
-                        Rp ${harga}
-                    </p>
-
-                    <hr>
-
-                    <pre>${hasil}</pre>
+                    <pre style="
+                        white-space:pre-wrap;
+                        font-size:14px;
+                    ">${JSON.stringify(trx.data, null, 2)}</pre>
 
                 </div>
 
-            </body>
+            </div>
 
-            </html>
+        </body>
+
+        </html>
 
         `);
 
+
+
+
+
     } catch (err) {
 
-        console.log(err.response?.data || err.message);
+        res.send(`
 
-        return res.send(`
+        <html>
 
-            <html>
+        <body style="
+            margin:0;
+            font-family:sans-serif;
+            background:#f2f2f2;
+        ">
 
-            <body style="font-family:sans-serif;background:#f5f5f5;padding:20px;">
+            <div style="
+                background:#2196f3;
+                color:white;
+                padding:18px;
+                font-size:28px;
+                font-weight:bold;
+            ">
+                Checkout Error
+            </div>
 
-                <div style="background:white;padding:20px;border-radius:10px;">
+            <div style="
+                padding:20px;
+            ">
 
-                    <h1 style="color:red;">
+                <div style="
+                    background:white;
+                    border-radius:12px;
+                    padding:20px;
+                ">
+
+                    <h1>
                         CHECKOUT ERROR
                     </h1>
 
                     <hr>
 
-                    <pre>
-${JSON.stringify(err.response?.data || err.message, null, 2)}
-                    </pre>
+                    <pre style="
+                        color:red;
+                        white-space:pre-wrap;
+                    ">${JSON.stringify(err.response?.data || err.message, null, 2)}</pre>
 
                 </div>
 
-            </body>
+            </div>
 
-            </html>
+        </body>
+
+        </html>
 
         `);
 
@@ -487,7 +352,25 @@ ${JSON.stringify(err.response?.data || err.message, null, 2)}
 });
 
 
-// ======================================
+
+
+
+/*
+====================================================
+RUN SERVER
+====================================================
+*/
+
+const PORT =
+process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+
+    console.log(
+        "Server running on port " + PORT
+    );
+
+});==
 // CALLBACK
 // ======================================
 
