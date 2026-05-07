@@ -10,29 +10,29 @@ app.use(cors());
 app.use(express.json());
 
 
-// ====================================
+// ======================================
 // ROOT
-// ====================================
+// ======================================
 
 app.get("/", (req, res) => {
 
     res.json({
         status: true,
-        message: "API Oke Connect Railway Active"
+        message: "API OKE CONNECT ACTIVE"
     });
 
 });
 
 
-// ====================================
+// ======================================
 // PRODUCTS
-// ====================================
+// ======================================
 
 app.get("/api/products", async (req, res) => {
 
     try {
 
-        // AMBIL PRODUK OKE CONNECT
+        // AMBIL DATA OKE CONNECT
         const response = await axios.get(
             "https://okeconnect.com/harga/json?id=905ccd028329b0a"
         );
@@ -41,11 +41,13 @@ app.get("/api/products", async (req, res) => {
 
         // FILTER MOBILE LEGENDS
         const products = data.filter(item =>
+
             item.kategori &&
             item.kategori.toLowerCase().includes("mobile legends")
+
         );
 
-        // FORMAT ULANG
+        // FORMAT DATA
         const result = products.map(item => ({
 
             code: item.kode,
@@ -71,9 +73,9 @@ app.get("/api/products", async (req, res) => {
 });
 
 
-// ====================================
+// ======================================
 // PORT
-// ====================================
+// ======================================
 
 const PORT = process.env.PORT || 3000;
 
