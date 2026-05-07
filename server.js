@@ -25,25 +25,25 @@ app.get("/", (req, res) => {
 
 
 // ======================================
-// PRODUCTS
+// PRODUCTS MOBILE LEGENDS
 // ======================================
 
 app.get("/api/products", async (req, res) => {
 
     try {
 
-        // AMBIL DATA OKE CONNECT
+        // AMBIL DATA DARI OKE CONNECT
         const response = await axios.get(
             "https://okeconnect.com/harga/json?id=905ccd028329b0a"
         );
 
         const data = response.data;
 
-        // FILTER MOBILE LEGENDS
+        // FILTER PRODUK DML
         const products = data.filter(item =>
 
-            item.kategori &&
-            item.kategori.toLowerCase().includes("mobile legends")
+            item.kode &&
+            item.kode.startsWith("DML")
 
         );
 
@@ -53,10 +53,11 @@ app.get("/api/products", async (req, res) => {
             code: item.kode,
             name: item.produk,
             price: item.harga,
-            category: item.kategori
+            category: "Mobile Legends"
 
         }));
 
+        // RESPONSE
         res.json(result);
 
     } catch (err) {
@@ -64,8 +65,10 @@ app.get("/api/products", async (req, res) => {
         console.log(err.message);
 
         res.status(500).json({
+
             status: false,
             message: "Gagal mengambil produk"
+
         });
 
     }
