@@ -115,7 +115,53 @@ app.get("/api/products", async (req, res) => {
 
 
 // ======================================
-// CHECKOUT
+// CEK NICKNAME
+// ======================================
+
+app.get("/api/cek-nickname", async (req, res) => {
+
+    try {
+
+        const user_id = req.query.user_id;
+        const zone = req.query.zone;
+        const game = req.query.game;
+
+        const response = await axios.get(
+            `https://cekid.solusimedia.my.id/api/game/${game}/?id=${user_id}&server=${zone}&key=e5771acb669df2b`
+        );
+
+        const data = response.data;
+
+        if (data.error_msg) {
+
+            return res.json({
+                status: false,
+                message: data.error_msg
+            });
+
+        }
+
+        res.json({
+            status: true,
+            nickname: data.nickname
+        });
+
+    } catch (err) {
+
+        console.log(err.message);
+
+        res.json({
+            status: false,
+            message: "Nickname tidak ditemukan"
+        });
+
+    }
+
+});
+
+
+// ======================================
+// CHECKOUT BUKAOLSHOP
 // ======================================
 
 app.get("/checkout", async (req, res) => {
@@ -128,78 +174,89 @@ app.get("/checkout", async (req, res) => {
 
         const target = user_id + zone;
 
-        const refid = Date.now();
+        const refid = "TRX" + Date.now();
 
-        // URL TRANSAKSI
-        const trxUrl =
-            `https://h2h.okeconnect.com/trx?` +
-            `product=${code}` +
-            `&dest=${target}` +
-            `&refID=${refid}` +
-            `&memberID=${process.env.OKE_MEMBER_ID}` +
-            `&pin=${process.env.OKE_PIN}` +
-            `&password=${process.env.OKE_PASSWORD}`;
+        // =====================================
+        // REQUEST KE BUKAOLSHOP
+        // =====================================
 
-        // REQUEST TRANSAKSI
-        const response = await axios.get(trxUrl);
+        const response = await axios.post(
 
-        // HASIL RESPONSE
+            "https://bukaolshop.net/api/v1/transaksi/create",
+
+            {
+
+                api_key: process.env.BOS_API_KEY,
+
+                product: code,
+
+                tujuan: target,
+
+                ref_id: refid
+
+            }
+
+        );
+
         const result = response.data;
 
+        // =====================================
         // TAMPILKAN HASIL
+        // =====================================
+
         res.send(`
 
-            <html>
+        <html>
 
-            <head>
+        <head>
 
-                <title>Transaksi</title>
+            <title>Transaksi</title>
 
-                <style>
+            <style>
 
-                    body{
-                        font-family: Arial;
-                        padding:20px;
-                        background:#f5f5f5;
-                    }
+                body{
+                    font-family: Arial;
+                    background:#f5f5f5;
+                    padding:20px;
+                }
 
-                    .card{
-                        background:white;
-                        padding:20px;
-                        border-radius:10px;
-                    }
+                .card{
+                    background:white;
+                    padding:20px;
+                    border-radius:10px;
+                }
 
-                </style>
+            </style>
 
-            </head>
+        </head>
 
-            <body>
+        <body>
 
-                <div class="card">
+            <div class="card">
 
-                    <h2>Transaksi Diproses</h2>
+                <h2>Transaksi Diproses</h2>
 
-                    <p><b>Produk:</b> ${code}</p>
+                <p><b>Produk:</b> ${code}</p>
 
-                    <p><b>Tujuan:</b> ${target}</p>
+                <p><b>Tujuan:</b> ${target}</p>
 
-                    <hr>
+                <hr>
 
-                    <pre>
+                <pre>
 ${JSON.stringify(result, null, 2)}
-                    </pre>
+                </pre>
 
-                </div>
+            </div>
 
-            </body>
+        </body>
 
-            </html>
+        </html>
 
         `);
 
     } catch (err) {
 
-        console.log(err.message);
+        console.log(err.response?.data || err.message);
 
         res.send("Checkout Error");
 
