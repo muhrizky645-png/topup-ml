@@ -1,127 +1,196 @@
 <script>
 
-const API = "https://topup-ml-production.up.railway.app";
+var API = "https://topup-ml-production.up.railway.app";
 
-let produkList = [];
+$(document).ready(function () {
 
-$(document).ready(function(){
+    $('#dm').off('click');
+    $('#mm').off('click');
 
-    loadProducts();
+    $('#dm').on('click', function () {
+        getData("ML");
+    });
+
+    $('#mm').on('click', function () {
+        getData("MEMBERSHIP");
+    });
+
+    getData("ML");
 
 });
 
-async function loadProducts(){
+function getData(type) {
 
-    $("#data").html("");
+    $('#data').html('');
+    $('#fake').html('');
 
-    try{
+    $.ajax({
 
-        const res = await fetch(API + "/products");
-        const data = await res.json();
+        type: "GET",
 
-        produkList = data.products.filter(item => {
+        url: API + "/products",
 
-            return (
-                item.kode.includes("DML")
-                ||
-                item.keterangan.toLowerCase().includes("mobile legend")
-            );
+        dataType: "json",
 
-        });
+        beforeSend: function () {
 
-        renderProducts(produkList);
+            for (let i = 0; i < 10; i++) {
 
-    }catch(err){
+                $('#fake').append(
 
-        alert("Gagal load produk");
+                    '<div class="col-12">' +
+                    '<div class="btn btn-light w-100 mb-2 skeleton">' +
+                    '<p class="skeleton-text"></p>' +
+                    '</div>' +
+                    '</div>'
 
-    }
+                );
 
-}
+            }
 
-function renderProducts(products){
+        },
 
-    $("#data").html("");
+        success: function (response) {
 
-    products.forEach(v => {
+            $('#fake').html('');
 
-        $("#data").append(`
+            let products = response.products;
 
-        <div class="col-12">
+            products.forEach(function (v) {
 
-            <button
-            class="btn btn-light bg-white border w-100 mb-2 shadow-sm py-2"
-            onclick="getDetail('${v.kode}','${v.keterangan}','${v.harga}')">
+                if (type == "ML") {
 
-                <div class="row align-items-center px-1">
+                    if (
+                        !v.kode.includes("DML")
+                        &&
+                        !v.keterangan.toLowerCase().includes("mobile legend")
+                    ) {
+                        return;
+                    }
 
-                    <div class="col-8 text-start">
-                        <p class="m-0" style="font-size:13px;">
-                            ${v.keterangan}
-                        </p>
-                    </div>
+                }
 
-                    <div class="col-4 bg-harga rounded-5">
-                        <p class="m-0 fw-bold">
-                            Rp ${v.harga}
-                        </p>
-                    </div>
+                if (type == "MEMBERSHIP") {
 
-                </div>
+                    if (
+                        !v.keterangan.toLowerCase().includes("membership")
+                    ) {
+                        return;
+                    }
 
-            </button>
+                }
 
-        </div>
+                $('#data').append(
 
-        `);
+                    '<div class="col-12">' +
+
+                    '<button class="btn btn-light bg-white border w-100 mb-2 shadow-sm py-2"' +
+
+                    'onclick="getDetail(' +
+
+                    '\'' + v.kode + '\',' +
+
+                    '\'' + v.keterangan + '\',' +
+
+                    '\'' + v.harga + '\'' +
+
+                    ')">' +
+
+                    '<div class="row align-items-center px-1">' +
+
+                    '<div class="col-8 text-start">' +
+
+                    '<p class="m-0" style="font-size:13px;">' +
+
+                    v.keterangan +
+
+                    '</p>' +
+
+                    '</div>' +
+
+                    '<div class="col-4 bg-harga rounded-5">' +
+
+                    '<p class="m-0 fw-bold">' +
+
+                    'Rp ' + v.harga +
+
+                    '</p>' +
+
+                    '</div>' +
+
+                    '</div>' +
+
+                    '</button>' +
+
+                    '</div>'
+
+                );
+
+            });
+
+        },
+
+        error: function () {
+
+            Swal.fire({
+
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Gagal mengambil produk'
+
+            });
+
+        }
 
     });
 
 }
 
-function getDetail(kode,nama,harga){
+function getDetail(kode, nama, harga) {
 
-    const id = $("#id").val();
-    const zone = $("#zone").val();
+    let id = $('#id').val();
+    let zone = $('#zone').val();
 
-    if(id == "" || zone == ""){
+    if (id == '' || zone == '') {
 
         Swal.fire({
-            icon:"error",
-            title:"Oops...",
-            text:"ID dan Zone wajib diisi"
+
+            icon: 'error',
+            title: 'Oops...',
+            text: 'ID dan Zone wajib diisi'
+
         });
 
         return;
 
     }
 
-    $("#nama_produk").text(nama);
+    $('#nama_produk').text(nama);
 
-    $("#no_tujuan").text(id + " | " + zone);
+    $('#no_tujuan').text(id + " | " + zone);
 
-    $("#harga").text("Rp " + harga);
+    $('#harga').text("Rp " + harga);
 
-    $("#full-desc").text(nama);
+    $('#full-desc').text(nama);
 
-    $("#modalTrx").modal("show");
+    $('#modalTrx').modal('show');
 
-    $("#linkBelis").off("click").on("click", async function(){
+    $("#linkBelis").off("click").on("click", async function () {
 
-        try{
+        try {
 
-            const res = await fetch(API + "/order",{
+            const res = await fetch(API + "/order", {
 
-                method:"POST",
+                method: "POST",
 
-                headers:{
-                    "Content-Type":"application/json"
+                headers: {
+                    "Content-Type": "application/json"
                 },
 
-                body:JSON.stringify({
+                body: JSON.stringify({
 
-                    product:kode,
-                    dest:id + zone
+                    product: kode,
+                    dest: id + zone
 
                 })
 
@@ -129,11 +198,23 @@ function getDetail(kode,nama,harga){
 
             const result = await res.text();
 
-            alert(result);
+            Swal.fire({
 
-        }catch(err){
+                icon: 'info',
+                title: 'Status',
+                text: result
 
-            alert("Transaksi gagal");
+            });
+
+        } catch (err) {
+
+            Swal.fire({
+
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Transaksi gagal'
+
+            });
 
         }
 
@@ -141,40 +222,44 @@ function getDetail(kode,nama,harga){
 
 }
 
-$("#zone").on("change", async function(){
+$("#zone").on('change', function () {
 
-    const id = $("#id").val();
-    const zone = $("#zone").val();
+    var id = $('#id').val();
+    var zone = $('#zone').val();
 
-    if(id == "" || zone == "") return;
+    $.ajax({
 
-    $("#cek").val("Mengecek...");
+        type: "GET",
 
-    try{
+        url:
+        `https://cekid.solusimedia.my.id/api/game/mobilelegends/?id=${id}&server=${zone}&key=e5771acb669df2b`,
 
-        const res = await fetch(
+        dataType: "JSON",
 
-            `https://cekid.solusimedia.my.id/api/game/mobilelegends/?id=${id}&server=${zone}&key=e5771acb669df2b`
+        beforeSend: function () {
 
-        );
+            $("#nick").html("Mengecek...");
+            $("#cek").val("Mengecek...");
 
-        const data = await res.json();
+        },
 
-        if(data.nickname){
+        success: function (data) {
 
-            $("#cek").val(data.nickname);
+            if (data.nickname) {
 
-        }else{
+                $("#nick").html(data.nickname);
+                $("#cek").val(data.nickname);
 
-            $("#cek").val("Nickname tidak ditemukan");
+            } else {
+
+                $("#nick").html("Tidak ditemukan");
+                $("#cek").val("Tidak ditemukan");
+
+            }
 
         }
 
-    }catch(err){
-
-        $("#cek").val("Gagal cek nickname");
-
-    }
+    });
 
 });
 
