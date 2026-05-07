@@ -32,14 +32,12 @@ app.get("/api/products", async (req, res) => {
 
     try {
 
-        // AMBIL DATA OKE CONNECT
         const response = await axios.get(
             "https://okeconnect.com/harga/json?id=905ccd028329b0a"
         );
 
         const data = response.data;
 
-        // FILTER PRODUK DML
         const products = data.filter(item =>
 
             item.kode &&
@@ -47,13 +45,10 @@ app.get("/api/products", async (req, res) => {
 
         );
 
-        // FORMAT PRODUK
         const result = products.map(item => ({
 
             code: item.kode,
 
-            // CONTOH:
-            // DML86 -> 86 Diamond Mobile Legends
             name: item.kode.replace("DML", "") + " Diamond Mobile Legends",
 
             price: item.harga,
@@ -62,7 +57,6 @@ app.get("/api/products", async (req, res) => {
 
         }));
 
-        // SORT BERDASARKAN JUMLAH DIAMOND
         result.sort((a, b) => {
 
             const aValue = parseInt(a.code.replace("DML", ""));
@@ -72,7 +66,6 @@ app.get("/api/products", async (req, res) => {
 
         });
 
-        // RESPONSE
         res.json(result);
 
     } catch (err) {
@@ -80,13 +73,116 @@ app.get("/api/products", async (req, res) => {
         console.log(err.message);
 
         res.status(500).json({
-
             status: false,
             message: "Gagal mengambil produk"
-
         });
 
     }
+
+});
+
+
+// ======================================
+// CHECKOUT
+// ======================================
+
+app.get("/checkout", async (req, res) => {
+
+    try {
+
+        const code = req.query.code;
+        const user_id = req.query.user_id;
+        const zone = req.query.zone;
+
+        const target = user_id + zone;
+
+        const refid = Date.now();
+
+        // URL TRANSAKSI
+        const trxUrl =
+            `https://h2h.okeconnect.com/trx?` +
+            `product=${code}` +
+            `&dest=${target}` +
+            `&refID=${refid}` +
+            `&memberID=${process.env.OKE_MEMBER_ID}` +
+            `&pin=${process.env.OKE_PIN}` +
+            `&password=${process.env.OKE_PASSWORD}`;
+
+        // REQUEST TRANSAKSI
+        const response = await axios.get(trxUrl);
+
+        // HASIL RESPONSE
+        const result = response.data;
+
+        // TAMPILKAN HASIL
+        res.send(`
+
+            <html>
+
+            <head>
+
+                <title>Transaksi</title>
+
+                <style>
+
+                    body{
+                        font-family: Arial;
+                        padding:20px;
+                        background:#f5f5f5;
+                    }
+
+                    .card{
+                        background:white;
+                        padding:20px;
+                        border-radius:10px;
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                <div class="card">
+
+                    <h2>Transaksi Diproses</h2>
+
+                    <p><b>Produk:</b> ${code}</p>
+
+                    <p><b>Tujuan:</b> ${target}</p>
+
+                    <hr>
+
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+
+                </div>
+
+            </body>
+
+            </html>
+
+        `);
+
+    } catch (err) {
+
+        console.log(err.message);
+
+        res.send("Checkout Error");
+
+    }
+
+});
+
+
+// ======================================
+// CALLBACK
+// ======================================
+
+app.get("/callback", async (req, res) => {
+
+    console.log(req.query);
+
+    res.send("Callback OK");
 
 });
 
