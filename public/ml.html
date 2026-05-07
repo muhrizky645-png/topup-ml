@@ -1,266 +1,262 @@
-<script>
+<!DOCTYPE html>
+<html lang="id">
 
-var API = "https://topup-ml-production.up.railway.app";
+<head>
 
-$(document).ready(function () {
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    $('#dm').off('click');
-    $('#mm').off('click');
+  <title>TOPUP ML</title>
 
-    $('#dm').on('click', function () {
-        getData("ML");
-    });
+  <style>
 
-    $('#mm').on('click', function () {
-        getData("MEMBERSHIP");
-    });
-
-    getData("ML");
-
-});
-
-function getData(type) {
-
-    $('#data').html('');
-    $('#fake').html('');
-
-    $.ajax({
-
-        type: "GET",
-
-        url: API + "/products",
-
-        dataType: "json",
-
-        beforeSend: function () {
-
-            for (let i = 0; i < 10; i++) {
-
-                $('#fake').append(
-
-                    '<div class="col-12">' +
-                    '<div class="btn btn-light w-100 mb-2 skeleton">' +
-                    '<p class="skeleton-text"></p>' +
-                    '</div>' +
-                    '</div>'
-
-                );
-
-            }
-
-        },
-
-        success: function (response) {
-
-            $('#fake').html('');
-
-            let products = response.products;
-
-            products.forEach(function (v) {
-
-                if (type == "ML") {
-
-                    if (
-                        !v.kode.includes("DML")
-                        &&
-                        !v.keterangan.toLowerCase().includes("mobile legend")
-                    ) {
-                        return;
-                    }
-
-                }
-
-                if (type == "MEMBERSHIP") {
-
-                    if (
-                        !v.keterangan.toLowerCase().includes("membership")
-                    ) {
-                        return;
-                    }
-
-                }
-
-                $('#data').append(
-
-                    '<div class="col-12">' +
-
-                    '<button class="btn btn-light bg-white border w-100 mb-2 shadow-sm py-2"' +
-
-                    'onclick="getDetail(' +
-
-                    '\'' + v.kode + '\',' +
-
-                    '\'' + v.keterangan + '\',' +
-
-                    '\'' + v.harga + '\'' +
-
-                    ')">' +
-
-                    '<div class="row align-items-center px-1">' +
-
-                    '<div class="col-8 text-start">' +
-
-                    '<p class="m-0" style="font-size:13px;">' +
-
-                    v.keterangan +
-
-                    '</p>' +
-
-                    '</div>' +
-
-                    '<div class="col-4 bg-harga rounded-5">' +
-
-                    '<p class="m-0 fw-bold">' +
-
-                    'Rp ' + v.harga +
-
-                    '</p>' +
-
-                    '</div>' +
-
-                    '</div>' +
-
-                    '</button>' +
-
-                    '</div>'
-
-                );
-
-            });
-
-        },
-
-        error: function () {
-
-            Swal.fire({
-
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Gagal mengambil produk'
-
-            });
-
-        }
-
-    });
-
-}
-
-function getDetail(kode, nama, harga) {
-
-    let id = $('#id').val();
-    let zone = $('#zone').val();
-
-    if (id == '' || zone == '') {
-
-        Swal.fire({
-
-            icon: 'error',
-            title: 'Oops...',
-            text: 'ID dan Zone wajib diisi'
-
-        });
-
-        return;
-
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial;
     }
 
-    $('#nama_produk').text(nama);
+    body{
+      background:#f3f3f3;
+    }
 
-    $('#no_tujuan').text(id + " | " + zone);
+    .topbar{
+      background:#2196f3;
+      color:white;
+      padding:18px;
+      font-size:28px;
+      font-weight:bold;
+      position:sticky;
+      top:0;
+    }
 
-    $('#harga').text("Rp " + harga);
+    .container{
+      padding:20px;
+    }
 
-    $('#full-desc').text(nama);
+    .title{
+      font-size:60px;
+      font-weight:bold;
+      margin-top:20px;
+      margin-bottom:30px;
+    }
 
-    $('#modalTrx').modal('show');
+    .search{
+      width:100%;
+      padding:20px;
+      border-radius:20px;
+      border:1px solid #ccc;
+      font-size:28px;
+      margin-bottom:30px;
+      background:white;
+    }
 
-    $("#linkBelis").off("click").on("click", async function () {
+    .card{
+      background:white;
+      border-radius:30px;
+      padding:30px;
+      margin-bottom:30px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    }
 
-        try {
+    .produk{
+      font-size:42px;
+      font-weight:bold;
+      line-height:1.4;
+      margin-bottom:25px;
+    }
 
-            const res = await fetch(API + "/order", {
+    .kode{
+      font-size:30px;
+      margin-bottom:25px;
+      color:#333;
+    }
 
-                method: "POST",
+    .harga{
+      font-size:34px;
+      margin-bottom:30px;
+      color:#111;
+    }
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+    button{
+      background:#2196f3;
+      color:white;
+      border:none;
+      padding:18px 40px;
+      border-radius:15px;
+      font-size:30px;
+      cursor:pointer;
+    }
 
-                body: JSON.stringify({
+    button:active{
+      transform:scale(0.97);
+    }
 
-                    product: kode,
-                    dest: id + zone
+  </style>
 
-                })
+</head>
 
-            });
+<body>
 
-            const result = await res.text();
+  <div class="topbar">
+    TOPUP ML
+  </div>
 
-            Swal.fire({
+  <div class="container">
 
-                icon: 'info',
-                title: 'Status',
-                text: result
+    <div class="title">
+      TOPUP ML
+    </div>
 
-            });
+    <input
+      type="text"
+      id="search"
+      class="search"
+      placeholder="Cari Produk"
+    >
 
-        } catch (err) {
+    <div id="products"></div>
 
-            Swal.fire({
+  </div>
 
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Transaksi gagal'
+<script>
 
-            });
+const API =
+"https://topup-ml-production.up.railway.app";
 
-        }
+let allProducts = [];
+
+async function loadProducts(){
+
+  try{
+
+    const res =
+    await fetch(API + "/products");
+
+    const data =
+    await res.json();
+
+    allProducts = data.products.filter(item => {
+
+      return (
+        item.kode.toUpperCase().includes("DML")
+        ||
+        item.keterangan.toLowerCase().includes("mobile legend")
+      );
 
     });
+
+    renderProducts(allProducts);
+
+  }catch(err){
+
+    alert("Gagal load produk");
+
+  }
 
 }
 
-$("#zone").on('change', function () {
+function renderProducts(products){
 
-    var id = $('#id').val();
-    var zone = $('#zone').val();
+  const container =
+  document.getElementById("products");
 
-    $.ajax({
+  container.innerHTML = "";
 
-        type: "GET",
+  products.forEach(item=>{
 
-        url:
-        `https://cekid.solusimedia.my.id/api/game/mobilelegends/?id=${id}&server=${zone}&key=e5771acb669df2b`,
+    if(item.status !== "1") return;
 
-        dataType: "JSON",
+    container.innerHTML += `
 
-        beforeSend: function () {
+      <div class="card">
 
-            $("#nick").html("Mengecek...");
-            $("#cek").val("Mengecek...");
+        <div class="produk">
+          ${item.keterangan}
+        </div>
 
-        },
+        <div class="kode">
+          Kode : ${item.kode}
+        </div>
 
-        success: function (data) {
+        <div class="harga">
+          Harga : Rp ${item.harga}
+        </div>
 
-            if (data.nickname) {
+        <button onclick="beli('${item.kode}')">
+          BELI
+        </button>
 
-                $("#nick").html(data.nickname);
-                $("#cek").val(data.nickname);
+      </div>
 
-            } else {
+    `;
 
-                $("#nick").html("Tidak ditemukan");
-                $("#cek").val("Tidak ditemukan");
+  });
 
-            }
+}
 
-        }
+async function beli(kode){
+
+  const tujuan =
+  prompt("Masukkan ID Mobile Legends");
+
+  if(!tujuan) return;
+
+  try{
+
+    const res =
+    await fetch(API + "/order",{
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        product:kode,
+        dest:tujuan
+      })
 
     });
 
+    const result =
+    await res.text();
+
+    alert(result);
+
+  }catch(err){
+
+    alert("Transaksi gagal");
+
+  }
+
+}
+
+document
+.getElementById("search")
+.addEventListener("input", function(){
+
+  const keyword =
+  this.value.toLowerCase();
+
+  const filtered =
+  allProducts.filter(item =>
+
+    item.keterangan
+    .toLowerCase()
+    .includes(keyword)
+
+  );
+
+  renderProducts(filtered);
+
 });
 
+loadProducts();
+
 </script>
+
+</body>
+</html>
