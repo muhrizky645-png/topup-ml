@@ -1,62 +1,52 @@
 const express = require("express");
 const axios = require("axios");
+const cors = require("cors");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
-const MEMBERID = "OK1526139";
-const APIKEY = "Rizkysaja123";
+const PORT = process.env.PORT || 3000;
 
-app.post("/order", async (req, res) => {
+app.get("/", (req,res)=>{
+    res.send("SERVER ACTIVE");
+});
 
-    try {
+app.get("/products/ml", async(req,res)=>{
 
-        const { product, dest } = req.body;
-
-        const ref_id =
-        "TRX" + Date.now();
-
-        const signature =
-        require("crypto")
-        .createHash("md5")
-        .update(MEMBERID + APIKEY + ref_id)
-        .digest("hex");
+    try{
 
         const response =
-        await axios.post(
-            "https://vip.okeconnect.com/api/member/transaksi",
-            new URLSearchParams({
-
-                memberID: MEMBERID,
-                pin: APIKEY,
-                password: APIKEY,
-
-                kode_produk: product,
-                tujuan: dest,
-
-                ref_id: ref_id
-
-            }),
-            {
-                headers:{
-                    "Content-Type":
-                    "application/x-www-form-urlencoded"
-                }
-            }
+        await axios.get(
+            "https://okeconnect.com/harga/json?id=905ccd028329b0a"
         );
 
-        res.json(response.data);
+        const all =
+        response.data.products;
 
-    } catch(err){
+        const ml =
+        all.filter(x =>
+            x.keterangan &&
+            x.keterangan.toLowerCase()
+            .includes("mobile legend")
+        );
 
-        res.json({
+        res.json(ml);
+
+    }catch(err){
+
+        console.log(err.message);
+
+        res.status(500).json({
             success:false,
-            error:err.message
+            message:"gagal ambil produk"
         });
 
     }
 
 });
 
-app.listen(3000);
+app.listen(PORT, ()=>{
+    console.log("RUNNING");
+});
