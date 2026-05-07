@@ -5,8 +5,8 @@ const app = express();
 
 app.use(express.json());
 
-const MEMBERID = "USERNAME_OKECONNECT";
-const APIKEY = "APIKEY_OKECONNECT";
+const MEMBERID = "OK1526139";
+const APIKEY = "Rizkysaja123";
 
 app.post("/order", async (req, res) => {
 
