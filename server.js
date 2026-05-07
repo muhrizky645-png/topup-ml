@@ -32,7 +32,7 @@ app.get("/api/products", async (req, res) => {
 
     try {
 
-        // AMBIL DATA DARI OKE CONNECT
+        // AMBIL DATA OKE CONNECT
         const response = await axios.get(
             "https://okeconnect.com/harga/json?id=905ccd028329b0a"
         );
@@ -47,15 +47,30 @@ app.get("/api/products", async (req, res) => {
 
         );
 
-        // FORMAT DATA
+        // FORMAT PRODUK
         const result = products.map(item => ({
 
             code: item.kode,
-            name: item.produk,
+
+            // CONTOH:
+            // DML86 -> 86 Diamond Mobile Legends
+            name: item.kode.replace("DML", "") + " Diamond Mobile Legends",
+
             price: item.harga,
+
             category: "Mobile Legends"
 
         }));
+
+        // SORT BERDASARKAN JUMLAH DIAMOND
+        result.sort((a, b) => {
+
+            const aValue = parseInt(a.code.replace("DML", ""));
+            const bValue = parseInt(b.code.replace("DML", ""));
+
+            return aValue - bValue;
+
+        });
 
         // RESPONSE
         res.json(result);
