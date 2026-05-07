@@ -16,11 +16,11 @@ app.use(express.static(path.join(__dirname, "public")));
 
 
 /*
-====================================================
-TEST MODE MEMBER BUKAOLSHOP
-====================================================
-ISI MANUAL UNTUK TESTING
-====================================================
+========================================
+TEST MEMBER BUKAOLSHOP
+========================================
+ISI MANUAL
+========================================
 */
 
 const member_id = "ISI_ID_MEMBER_BUKAOLSHOP";
@@ -31,9 +31,9 @@ const token_user = "ISI_TOKEN_USER_BUKAOLSHOP";
 
 
 /*
-====================================================
-API TOKEN BUKAOLSHOP
-====================================================
+========================================
+TOKEN BUKAOLSHOP
+========================================
 */
 
 const BUKAOLSHOP_TOKEN =
@@ -44,9 +44,9 @@ process.env.BUKAOLSHOP_TOKEN;
 
 
 /*
-====================================================
+========================================
 OKE CONNECT
-====================================================
+========================================
 */
 
 const OKE_MEMBER_ID =
@@ -63,9 +63,25 @@ process.env.OKE_PIN;
 
 
 /*
-====================================================
+========================================
+HOME
+========================================
+*/
+
+app.get("/", (req, res) => {
+
+    res.send("API RUNNING");
+
+});
+
+
+
+
+
+/*
+========================================
 CHECKOUT
-====================================================
+========================================
 */
 
 app.post("/checkout", async (req, res) => {
@@ -85,9 +101,9 @@ app.post("/checkout", async (req, res) => {
 
 
         /*
-        ============================================
-        CEK SALDO MEMBER BUKAOLSHOP
-        ============================================
+        ========================================
+        CEK SALDO MEMBER
+        ========================================
         */
 
         const saldoResponse = await axios.get(
@@ -105,44 +121,26 @@ app.post("/checkout", async (req, res) => {
 
 
 
-        if (saldo < price) {
+        if (Number(saldo) < Number(price)) {
 
             return res.send(`
 
             <html>
+            <body style="font-family:sans-serif;padding:20px;background:#f2f2f2;">
 
-            <body style="
-                font-family:sans-serif;
-                padding:20px;
-                background:#f2f2f2;
-            ">
+            <div style="background:white;padding:20px;border-radius:10px;">
 
-                <div style="
-                    background:white;
-                    padding:20px;
-                    border-radius:10px;
-                ">
+            <h1>SALDO TIDAK CUKUP</h1>
 
-                    <h1>SALDO TIDAK CUKUP</h1>
+            <hr>
 
-                    <hr>
+            <p>Saldo Member : Rp ${saldo}</p>
 
-                    <p>
-                        Saldo member tidak mencukupi
-                    </p>
+            <p>Harga Produk : Rp ${price}</p>
 
-                    <p>
-                        Saldo : Rp ${saldo}
-                    </p>
-
-                    <p>
-                        Harga : Rp ${price}
-                    </p>
-
-                </div>
+            </div>
 
             </body>
-
             </html>
 
             `);
@@ -154,9 +152,9 @@ app.post("/checkout", async (req, res) => {
 
 
         /*
-        ============================================
+        ========================================
         POTONG SALDO MEMBER
-        ============================================
+        ========================================
         */
 
         await axios.post(
@@ -181,9 +179,9 @@ app.post("/checkout", async (req, res) => {
 
 
         /*
-        ============================================
+        ========================================
         TRANSAKSI OKE CONNECT
-        ============================================
+        ========================================
         */
 
         const refId =
@@ -213,20 +211,14 @@ app.post("/checkout", async (req, res) => {
 
 
         /*
-        ============================================
-        TAMPILAN BERHASIL
-        ============================================
+        ========================================
+        SUCCESS
+        ========================================
         */
 
         res.send(`
 
         <html>
-
-        <head>
-
-            <title>Transaksi</title>
-
-        </head>
 
         <body style="
             margin:0;
@@ -244,9 +236,7 @@ app.post("/checkout", async (req, res) => {
                 Transaksi
             </div>
 
-            <div style="
-                padding:20px;
-            ">
+            <div style="padding:20px;">
 
                 <div style="
                     background:white;
@@ -254,9 +244,7 @@ app.post("/checkout", async (req, res) => {
                     padding:20px;
                 ">
 
-                    <h1>
-                        Transaksi Diproses
-                    </h1>
+                    <h1>Transaksi Diproses</h1>
 
                     <p>
                         <b>Produk:</b>
@@ -296,6 +284,8 @@ app.post("/checkout", async (req, res) => {
 
     } catch (err) {
 
+        console.log(err);
+
         res.send(`
 
         <html>
@@ -316,9 +306,7 @@ app.post("/checkout", async (req, res) => {
                 Checkout Error
             </div>
 
-            <div style="
-                padding:20px;
-            ">
+            <div style="padding:20px;">
 
                 <div style="
                     background:white;
@@ -326,9 +314,7 @@ app.post("/checkout", async (req, res) => {
                     padding:20px;
                 ">
 
-                    <h1>
-                        CHECKOUT ERROR
-                    </h1>
+                    <h1>CHECKOUT ERROR</h1>
 
                     <hr>
 
@@ -356,9 +342,9 @@ app.post("/checkout", async (req, res) => {
 
 
 /*
-====================================================
+========================================
 RUN SERVER
-====================================================
+========================================
 */
 
 const PORT =
@@ -367,7 +353,7 @@ process.env.PORT || 3000;
 app.listen(PORT, () => {
 
     console.log(
-        "Server running on port " + PORT
+        "SERVER RUNNING : " + PORT
     );
 
 });
